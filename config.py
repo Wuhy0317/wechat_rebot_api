@@ -1,7 +1,8 @@
 import logging
+import os
 
-# 企业微信机器人Webhook地址
-WECHAT_ROBOT_URL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=d6576147-8584-4b67-92a4-dbaaa4dcd5ea"
+# 从环境变量读取企业微信机器人Webhook地址，支持多个地址用逗号分隔
+WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", "").split(",") if url.strip()]
 
 # Flask应用配置
 APP_CONFIG = {

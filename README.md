@@ -39,11 +39,33 @@
 
 ### 配置
 
-编辑 `config.py` 文件，修改企业微信机器人Webhook地址：
+通过环境变量配置企业微信机器人Webhook地址，支持多个地址用逗号分隔：
+
+```bash
+# Linux/macOS - 单个地址
+export WECHAT_ROBOT_URLS="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your-webhook-key"
+
+# Linux/macOS - 多个地址
+export WECHAT_ROBOT_URLS="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1,https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2"
+
+# Windows (cmd) - 单个地址
+set WECHAT_ROBOT_URLS="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your-webhook-key"
+
+# Windows (cmd) - 多个地址
+set WECHAT_ROBOT_URLS="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1,https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2"
+
+# Windows (PowerShell) - 单个地址
+$env:WECHAT_ROBOT_URLS="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your-webhook-key"
+
+# Windows (PowerShell) - 多个地址
+$env:WECHAT_ROBOT_URLS="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1,https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2"
+```
+
+或者，您也可以直接编辑 `config.py` 文件，设置默认值：
 
 ```python
-# 企业微信机器人Webhook地址
-WECHAT_ROBOT_URL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your-webhook-key"
+# 从环境变量读取企业微信机器人Webhook地址，支持多个地址用逗号分隔
+WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your-webhook-key").split(",") if url.strip()]
 ```
 
 ### 运行项目
