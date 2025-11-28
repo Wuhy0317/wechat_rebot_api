@@ -21,9 +21,17 @@ def receive_and_forward():
         json_data = request.get_json()
         if json_data and "content" in json_data:
             content = json_data["content"]
+            # 从JSON获取额外的机器人地址
+            extra_urls = json_data.get("webhook_urls", "")
+            # 从JSON获取是否仅使用额外地址
+            only_use_extra_urls = json_data.get("only_use_extra_urls", False)
         else:
             # 尝试获取表单数据
             content = request.form.get("content")
+            # 从表单获取额外的机器人地址
+            extra_urls = request.form.get("webhook_urls", "")
+            # 从表单获取是否仅使用额外地址
+            only_use_extra_urls = request.form.get("only_use_extra_urls", "false").lower() == "true"
 
         if not content:
             response = jsonify({
@@ -34,7 +42,7 @@ def receive_and_forward():
             return response, 400
 
         # 转发到企业微信机器人
-        success, message = send_to_wechat_robot(content, logger)
+        success, message = send_to_wechat_robot(content, logger, extra_urls, only_use_extra_urls)
 
         response = jsonify({
             "success": success,

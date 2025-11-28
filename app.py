@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from .config import APP_CONFIG, setup_logging
 from .api import register_routes
 
@@ -16,6 +17,9 @@ app.json.ensure_ascii = False
 
 # 注册API路由
 register_routes(app)
+
+# 启用CORS
+CORS(app)
 
 if __name__ == '__main__':
     # 生产环境中应使用适当的WSGI服务器如Gunicorn

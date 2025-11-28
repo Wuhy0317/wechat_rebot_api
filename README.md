@@ -145,6 +145,29 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
 - Kubernetes：通过Service IP或Ingress访问
 
 
+## 前端页面
+
+### 访问地址
+
+服务启动后，可以通过以下地址访问前端页面：
+- http://127.0.0.1:5000/static/index.html
+
+### 功能说明
+
+1. **消息发送**：在文本框中输入消息内容，点击"发送消息"按钮即可发送到企业微信机器人
+2. **快捷键支持**：按住Ctrl+Enter键可以快速发送消息
+3. **清空内容**：点击"清空内容"按钮可以清空文本框
+4. **发送历史**：自动保存最近20条发送记录，包含发送时间和内容
+5. **状态提示**：显示发送状态，包括成功、失败和发送中
+
+### 页面特点
+
+- 现代化的渐变背景设计
+- 响应式布局，支持移动端
+- 流畅的动画效果
+- 清晰的状态反馈
+- 简洁易用的界面
+
 ## API文档
 
 ### 接口列表
@@ -154,6 +177,7 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
 | / | GET | 首页，返回欢迎信息 |
 | /health | GET | 健康检查接口 |
 | /send-message | POST | 发送消息到企业微信机器人 |
+| /static/index.html | GET | 前端页面 |
 
 ### 发送消息接口
 
@@ -170,17 +194,28 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
 | 参数名 | 类型 | 必填 | 描述 |
 |-------|------|------|------|
 | content | string | 是 | 要发送的消息内容 |
+| webhook_urls | string | 否 | 额外的机器人地址，多个地址用逗号分隔 |
 
 **请求示例**：
 
-1. JSON格式
+1. JSON格式 - 仅发送消息
    ```bash
    curl -X POST -H "Content-Type: application/json" -d '{"content": "测试消息"}' http://127.0.0.1:5000/send-message
    ```
 
-2. Form-Data格式
+2. JSON格式 - 发送消息并指定额外机器人地址
+   ```bash
+   curl -X POST -H "Content-Type: application/json" -d '{"content": "测试消息", "webhook_urls": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1,https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2"}' http://127.0.0.1:5000/send-message
+   ```
+
+3. Form-Data格式 - 仅发送消息
    ```bash
    curl -X POST -F "content=测试消息" http://127.0.0.1:5000/send-message
+   ```
+
+4. Form-Data格式 - 发送消息并指定额外机器人地址
+   ```bash
+   curl -X POST -F "content=测试消息" -F "webhook_urls=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1,https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2" http://127.0.0.1:5000/send-message
    ```
 
 **响应示例**：
