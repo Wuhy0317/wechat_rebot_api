@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  wechat-robot-api:
+    build: .
+    container_name: wechat-robot-api
+    ports:
+      - "5000:5000"
+    environment:
+      - WECHAT_ROBOT_URLS=${WECHAT_ROBOT_URLS}
+    volumes:
+      - ./wechat_robot.log:/app/wechat_robot.log
+    restart: unless-stopped
+    networks:
+      - wechat-robot-network
+
+networks:
+  wechat-robot-network:
+    driver: bridge

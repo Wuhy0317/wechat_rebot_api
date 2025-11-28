@@ -73,6 +73,8 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
 
 ### 运行项目
 
+#### 方法一：直接运行
+
 1. 从项目根目录的父目录运行：
    ```bash
    cd ..
@@ -84,9 +86,64 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
    source venv/bin/activate && python -m wechat_rebot_api.app
    ```
 
-3. 服务将在以下地址运行：
-   - http://127.0.0.1:5000
-   - http://0.0.0.0:5000
+#### 方法二：使用Docker
+
+1. 构建Docker镜像：
+   ```bash
+   docker build -t wechat-robot-api .
+   ```
+
+2. 运行Docker容器：
+   ```bash
+   docker run -d -p 5000:5000 --name wechat-robot-api -e WECHAT_ROBOT_URLS="your-webhook-urls" wechat-robot-api
+   ```
+
+#### 方法三：使用docker-compose
+
+1. 创建.env文件（可选）：
+   ```bash
+   echo "WECHAT_ROBOT_URLS=your-webhook-urls" > .env
+   ```
+
+2. 启动服务：
+   ```bash
+   docker-compose up -d
+   ```
+
+3. 停止服务：
+   ```bash
+   docker-compose down
+   ```
+
+#### 方法四：使用Kubernetes
+
+1. 应用Deployment和Service配置：
+   ```bash
+   kubectl apply -f k8s-deployment.yaml
+   ```
+
+2. 查看部署状态：
+   ```bash
+   kubectl get deployments
+   kubectl get pods
+   kubectl get services
+   ```
+
+3. 查看日志：
+   ```bash
+   kubectl logs -f deployment/wechat-robot-api
+   ```
+
+4. 删除部署：
+   ```bash
+   kubectl delete -f k8s-deployment.yaml
+   ```
+
+#### 服务访问地址
+
+- 直接运行/Docker/docker-compose：http://127.0.0.1:5000
+- Kubernetes：通过Service IP或Ingress访问
+
 
 ## API文档
 

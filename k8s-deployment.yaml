@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wechat-robot-api
+  labels:
+    app: wechat-robot-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wechat-robot-api
+  template:
+    metadata:
+      labels:
+        app: wechat-robot-api
+    spec:
+      containers:
+      - name: wechat-robot-api
+        image: wechat-robot-api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        env:
+        - name: WECHAT_ROBOT_URLS
+          value: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your-webhook-key"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: logs
+          mountPath: /app/wechat_robot.log
+      volumes:
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wechat-robot-api-service
+spec:
+  selector:
+    app: wechat-robot-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+  type: ClusterIP
