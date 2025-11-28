@@ -37,7 +37,7 @@
 
 3. 安装依赖
    ```bash
-   pip install flask requests
+   pip install flask requests flask-cors
    ```
 
 ### 配置
@@ -159,6 +159,9 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
 3. **清空内容**：点击"清空内容"按钮可以清空文本框
 4. **发送历史**：自动保存最近20条发送记录，包含发送时间和内容
 5. **状态提示**：显示发送状态，包括成功、失败和发送中
+6. **预览发送地址**：点击"预览发送地址"按钮可以查看即将发送到的机器人地址
+7. **额外机器人地址**：可以在文本框中输入额外的机器人地址，多个地址用逗号分隔
+8. **仅使用额外地址**：可以选择仅发送到额外输入的机器人地址，跳过环境变量中的地址
 
 ### 页面特点
 
@@ -177,6 +180,7 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
 | / | GET | 首页，返回欢迎信息 |
 | /health | GET | 健康检查接口 |
 | /send-message | POST | 发送消息到企业微信机器人 |
+| /get-webhook-urls | GET | 获取当前配置的机器人地址 |
 | /static/index.html | GET | 前端页面 |
 
 ### 发送消息接口
@@ -195,6 +199,7 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
 |-------|------|------|------|
 | content | string | 是 | 要发送的消息内容 |
 | webhook_urls | string | 否 | 额外的机器人地址，多个地址用逗号分隔 |
+| only_use_extra_urls | boolean | 否 | 是否仅使用额外的机器人地址，跳过环境变量中的地址 |
 
 **请求示例**：
 
@@ -208,14 +213,24 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
    curl -X POST -H "Content-Type: application/json" -d '{"content": "测试消息", "webhook_urls": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1,https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2"}' http://127.0.0.1:5000/send-message
    ```
 
-3. Form-Data格式 - 仅发送消息
+3. JSON格式 - 仅使用额外机器人地址
+   ```bash
+   curl -X POST -H "Content-Type: application/json" -d '{"content": "测试消息", "webhook_urls": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1", "only_use_extra_urls": true}' http://127.0.0.1:5000/send-message
+   ```
+
+4. Form-Data格式 - 仅发送消息
    ```bash
    curl -X POST -F "content=测试消息" http://127.0.0.1:5000/send-message
    ```
 
-4. Form-Data格式 - 发送消息并指定额外机器人地址
+5. Form-Data格式 - 发送消息并指定额外机器人地址
    ```bash
    curl -X POST -F "content=测试消息" -F "webhook_urls=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1,https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2" http://127.0.0.1:5000/send-message
+   ```
+
+6. Form-Data格式 - 仅使用额外机器人地址
+   ```bash
+   curl -X POST -F "content=测试消息" -F "webhook_urls=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1" -F "only_use_extra_urls=true" http://127.0.0.1:5000/send-message
    ```
 
 **响应示例**：
@@ -246,6 +261,33 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
      "timestamp": "2025-11-27T19:22:28.536123"
    }
    ```
+
+### 获取机器人地址接口
+
+**接口地址**：`/get-webhook-urls`
+
+**请求方法**：`GET`
+
+**功能描述**：获取当前配置的机器人地址列表，包括从环境变量中读取的地址。
+
+**响应示例**：
+
+```json
+{
+  "env_urls": [
+    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1",
+    "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2"
+  ],
+  "total_env_urls": 2
+}
+```
+
+**响应字段说明**：
+
+| 字段名 | 类型 | 描述 |
+|-------|------|------|
+| env_urls | array | 环境变量中配置的机器人地址列表 |
+| total_env_urls | integer | 环境变量中配置的机器人地址数量 |
 
 ### 健康检查接口
 
@@ -285,9 +327,15 @@ wechat_rebot_api/
 ├── api.py               # API路由定义
 ├── config.py            # 配置信息
 ├── wechat_service.py    # 企业微信机器人服务
+├── static/              # 静态文件目录
+│   └── index.html       # 前端页面
 ├── wechat_robot.log     # 日志文件
 ├── venv/                # 虚拟环境（可选）
-└── README.md            # 项目说明文档
+├── README.md            # 项目说明文档
+├── Dockerfile           # Docker构建文件
+├── docker-compose.yml   # Docker Compose配置
+├── k8s-deployment.yaml  # Kubernetes部署配置
+└── requirements.txt     # 依赖列表
 ```
 
 ## 日志说明
