@@ -216,11 +216,28 @@
         
         <div class="btn-container">
             <button class="btn-primary" id="sendBtn">发送消息</button>
+            <button class="btn-secondary" id="previewBtn">预览发送地址</button>
             <button class="btn-secondary" id="clearBtn">清空内容</button>
         </div>
         
+        <div class="preview-section" style="margin-top: 25px; display: none;">
+            <h3 style="color: #333; margin-bottom: 15px; font-size: 20px;">发送地址预览</h3>
+            <div id="envUrls" style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #2196f3;">
+                <strong>环境变量地址：</strong>
+                <div id="envUrlsList" style="margin-top: 5px; color: #555;">无地址</div>
+            </div>
+            <div id="extraUrls" style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #4caf50;">
+                <strong>前端追加地址：</strong>
+                <div id="extraUrlsList" style="margin-top: 5px; color: #555;">无地址</div>
+            </div>
+            <div id="finalUrls" style="padding: 15px; background: #fff3cd; border-radius: 12px; border-left: 4px solid #ffc107;">
+                <strong>最终发送地址：</strong>
+                <div id="finalUrlsList" style="margin-top: 5px; color: #555;">无地址</div>
+            </div>
+        </div>
+        
         <div class="history">
-            <h3>发送历史</h3>
+            <h3 style="margin: 0 0 15px 0; color: #333; font-size: 20px;">发送历史</h3>
             <div class="history-list" id="historyList"></div>
         </div>
     </div>
@@ -230,9 +247,14 @@
         const webhookUrlsInput = document.getElementById('webhookUrls');
         const onlyUseExtraUrlsCheckbox = document.getElementById('onlyUseExtraUrls');
         const sendBtn = document.getElementById('sendBtn');
+        const previewBtn = document.getElementById('previewBtn');
         const clearBtn = document.getElementById('clearBtn');
         const status = document.getElementById('status');
         const historyList = document.getElementById('historyList');
+        const previewSection = document.querySelector('.preview-section');
+        const envUrlsList = document.getElementById('envUrlsList');
+        const extraUrlsList = document.getElementById('extraUrlsList');
+        const finalUrlsList = document.getElementById('finalUrlsList');
 
         // 加载历史记录
         function loadHistory() {
@@ -335,11 +357,70 @@
             webhookUrlsInput.value = '';
             onlyUseExtraUrlsCheckbox.checked = false;
             status.style.display = 'none';
+            previewSection.style.display = 'none';
             messageInput.focus();
+        }
+        
+        // 预览发送地址
+        async function previewUrls() {
+            previewBtn.disabled = true;
+            previewBtn.textContent = '预览中...';
+            
+            try {
+                // 获取环境变量地址
+                const response = await fetch('/get-webhook-urls');
+                const result = await response.json();
+                const envUrls = result.env_urls || [];
+                
+                // 解析前端输入的额外地址
+                const extraUrlsInput = webhookUrlsInput.value.trim();
+                const extraUrls = extraUrlsInput ? extraUrlsInput.split(',').map(url => url.trim()).filter(url => url) : [];
+                
+                // 计算最终发送地址
+                const onlyUseExtra = onlyUseExtraUrlsCheckbox.checked;
+                let finalUrls = [];
+                
+                if (onlyUseExtra) {
+                    finalUrls = extraUrls;
+                } else {
+                    finalUrls = [...envUrls, ...extraUrls];
+                }
+                
+                // 显示环境变量地址
+                if (envUrls.length > 0) {
+                    envUrlsList.innerHTML = envUrls.map(url => `<div style="margin: 5px 0; padding: 8px; background: #e3f2fd; border-radius: 8px;">${url}</div>`).join('');
+                } else {
+                    envUrlsList.textContent = '无地址';
+                }
+                
+                // 显示前端追加地址
+                if (extraUrls.length > 0) {
+                    extraUrlsList.innerHTML = extraUrls.map(url => `<div style="margin: 5px 0; padding: 8px; background: #e8f5e8; border-radius: 8px;">${url}</div>`).join('');
+                } else {
+                    extraUrlsList.textContent = '无地址';
+                }
+                
+                // 显示最终发送地址
+                if (finalUrls.length > 0) {
+                    finalUrlsList.innerHTML = finalUrls.map((url, index) => `<div style="margin: 5px 0; padding: 8px; background: #fff9c4; border-radius: 8px;">${index + 1}. ${url}</div>`).join('');
+                } else {
+                    finalUrlsList.textContent = '无地址';
+                }
+                
+                // 显示预览区域
+                previewSection.style.display = 'block';
+                
+            } catch (error) {
+                showStatus(`获取地址失败：${error.message}`, 'error');
+            } finally {
+                previewBtn.disabled = false;
+                previewBtn.textContent = '预览发送地址';
+            }
         }
 
         // 事件监听
         sendBtn.addEventListener('click', sendMessage);
+        previewBtn.addEventListener('click', previewUrls);
         clearBtn.addEventListener('click', clearContent);
         messageInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) {

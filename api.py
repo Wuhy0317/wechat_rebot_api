@@ -85,6 +85,24 @@ def index():
     return response, 200
 
 
+@api_bp.route('/get-webhook-urls', methods=['GET'])
+def get_webhook_urls():
+    """
+    获取当前配置的机器人地址
+    
+    Returns:
+        json: 包含环境变量地址的响应
+    """
+    from .config import WECHAT_ROBOT_URLS
+    
+    response = jsonify({
+        "env_urls": WECHAT_ROBOT_URLS,
+        "total_env_urls": len(WECHAT_ROBOT_URLS)
+    })
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    return response, 200
+
+
 def register_routes(app):
     """
     注册API路由到Flask应用
