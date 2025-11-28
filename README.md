@@ -11,6 +11,9 @@
 - 完善的日志记录
 - 支持中文响应
 - 简单易用的API接口
+- 支持从环境变量读取多个webhook地址
+- 向所有配置的机器人发送消息
+- 返回详细的发送结果
 
 ## 快速开始
 
@@ -125,13 +128,32 @@ WECHAT_ROBOT_URLS = [url.strip() for url in os.environ.get("WECHAT_ROBOT_URLS", 
 
 **响应示例**：
 
-```json
-{
-  "success": true,
-  "message": "消息发送成功",
-  "timestamp": "2025-11-27T19:22:28.536123"
-}
-```
+1. 全部发送成功
+   ```json
+   {
+     "success": true,
+     "message": "消息发送成功，共发送到 2 个机器人",
+     "timestamp": "2025-11-27T19:22:28.536123"
+   }
+   ```
+
+2. 部分发送成功
+   ```json
+   {
+     "success": false,
+     "message": "部分消息发送成功，成功 1 个，失败 1 个。错误信息: 消息发送失败到 https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2: invalid webhook url",
+     "timestamp": "2025-11-27T19:22:28.536123"
+   }
+   ```
+
+3. 全部发送失败
+   ```json
+   {
+     "success": false,
+     "message": "所有消息发送失败。错误信息: 消息发送失败到 https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key1: invalid webhook url; 消息发送失败到 https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=key2: invalid webhook url",
+     "timestamp": "2025-11-27T19:22:28.536123"
+   }
+   ```
 
 ### 健康检查接口
 
